@@ -1,0 +1,150 @@
+/* Importa uma fonte para deixar mais bonito */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #0c1a3e;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+#jogo-container {
+    width: 90%;
+    max-width: 800px;
+    background-color: #1a2952;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.escondido {
+    display: none;
+}
+
+button {
+    background-color: #fca311;
+    color: #14213d;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, opacity 0.3s;
+    margin: 5px; /* Adicionado para espaçamento */
+}
+
+button:hover:not(:disabled) {
+    background-color: #e8950d;
+}
+
+button:disabled {
+    background-color: #555;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Estilos para telas iniciais */
+#modo-selecao, #tela-editor {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+#tela-editor p {
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+.editor-botoes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.editor-status {
+    font-style: italic;
+    color: #ccc;
+    font-size: 0.9em !important;
+}
+
+#placar {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+#placar span {
+    margin: 5px 10px;
+}
+
+#ajudas-container {
+    margin-bottom: 20px;
+}
+
+.ajuda {
+    background-color: #4a5a88;
+    color: white;
+}
+
+#pergunta-container {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    min-height: 50px;
+}
+
+#opcoes-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.opcao {
+    background-color: #1e3a8a;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, visibility 0.3s;
+}
+
+.opcao:hover {
+    background-color: #3b5998;
+}
+
+/* ANIMAÇÕES DE PISCAR REFINADAS */
+@keyframes pisca-verde {
+    0%, 100% { background-color: #28a745; transform: scale(1.02); }
+    50% { background-color: #1e3a8a; transform: scale(1); }
+}
+
+@keyframes pisca-vermelho {
+    0%, 100% { background-color: #dc3545; transform: scale(1.02); }
+    50% { background-color: #1e3a8a; transform: scale(1); }
+}
+
+.opcao.correta {
+    animation: pisca-verde 0.8s 3; /* Pisca 3 vezes */
+    color: white;
+}
+
+.opcao.errada {
+    animation: pisca-vermelho 0.8s 3; /* Pisca 3 vezes */
+    color: white;
+}
+
+.opcao.revelada {
+    background-color: #28a745;
+    color: white;
+}

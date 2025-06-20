@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show do Milhão</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Biblioteca de som adicionada -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+</head>
+<body>
+
+    <div id="jogo-container">
+        <!-- TELA INICIAL COM ESCOLHA DE MODO -->
+        <div id="tela-inicial">
+            <h1>Show do Milhão</h1>
+            <div id="modo-selecao">
+                <button id="btn-modo-jogador">Modo Jogador</button>
+                <button id="btn-modo-editor">Modo Editor</button>
+            </div>
+        </div>
+
+        <!-- TELA DO MODO EDITOR ATUALIZADA -->
+        <div id="tela-editor" class="escondido">
+            <h2>Modo Editor</h2>
+            <p>Personalize seu jogo. Carregue um arquivo de perguntas e seus próprios sons.</p>
+            <div class="editor-botoes">
+                <button id="btn-carregar-perguntas">Carregar Perguntas (.json)</button>
+                <button id="btn-carregar-som-acerto">Carregar Sons de Acerto</button>
+                <button id="btn-carregar-som-erro">Carregar Sons de Erro</button>
+                <button id="btn-voltar-inicio">Voltar</button>
+            </div>
+            <p class="editor-status" id="status-perguntas">Nenhum arquivo de perguntas carregado.</p>
+            <p class="editor-status" id="status-sons">Usando sons padrão.</p>
+             <!-- Inputs para carregar arquivos, sempre escondidos -->
+            <input type="file" id="input-perguntas" accept=".json" class="escondido">
+            <input type="file" id="input-som-acerto" accept="audio/*" class="escondido" multiple>
+            <input type="file" id="input-som-erro" accept="audio/*" class="escondido" multiple>
+        </div>
+
+        <!-- TELA DE JOGO -->
+        <div id="tela-jogo" class="escondido">
+            <div id="placar">
+                <span>Nível: <span id="nivel-atual">1</span></span>
+                <span>Errar: R$ <span id="valor-errar">0</span></span>
+                <span>Parar: R$ <span id="valor-parar">0</span></span>
+                <span>Acertar: R$ <span id="valor-acertar">1.000</span></span>
+            </div>
+            <div id="ajudas-container">
+                <button id="btn-pular" class="ajuda">Pular (3)</button>
+                <button id="btn-cartas" class="ajuda">Cartas</button>
+                <button id="btn-universitarios" class="ajuda">Universitários</button>
+            </div>
+            <div id="pergunta-container">
+                <p id="pergunta-texto"></p>
+            </div>
+            <div id="opcoes-container"></div>
+            <button id="btn-parar">Parar</button>
+        </div>
+
+        <!-- TELA FINAL -->
+        <div id="tela-final" class="escondido">
+            <h2>Fim de Jogo!</h2>
+            <p>Você ganhou: <strong id="premio-final">R$ 0</strong></p>
+            <button id="btn-reiniciar">Jogar Novamente</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
