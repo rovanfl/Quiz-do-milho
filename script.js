@@ -1,22 +1,11 @@
 // --- SELEÇÃO DE ELEMENTOS DO DOM ---
 const telaInicial = document.getElementById('tela-inicial');
-const telaEditor = document.getElementById('tela-editor');
 const telaJogo = document.getElementById('tela-jogo');
 const telaFinal = document.getElementById('tela-final');
 
 const btnModoJogador = document.getElementById('btn-modo-jogador');
-const btnModoEditor = document.getElementById('btn-modo-editor');
 const btnCarregarPerguntas = document.getElementById('btn-carregar-perguntas');
-const btnCarregarSomAcerto = document.getElementById('btn-carregar-som-acerto');
-const btnCarregarSomErro = document.getElementById('btn-carregar-som-erro');
-const btnVoltarInicio = document.getElementById('btn-voltar-inicio');
-
 const inputPerguntas = document.getElementById('input-perguntas');
-const inputSomAcerto = document.getElementById('input-som-acerto');
-const inputSomErro = document.getElementById('input-som-erro');
-
-const statusPerguntas = document.getElementById('status-perguntas');
-const statusSons = document.getElementById('status-sons');
 
 const btnParar = document.getElementById('btn-parar');
 const btnReiniciar = document.getElementById('btn-reiniciar');
@@ -24,9 +13,11 @@ const btnPular = document.getElementById('btn-pular');
 const btnCartas = document.getElementById('btn-cartas');
 const btnUniversitarios = document.getElementById('btn-universitarios');
 
+const perguntaContainer = document.getElementById('pergunta-container');
 const perguntaTexto = document.getElementById('pergunta-texto');
 const opcoesContainer = document.getElementById('opcoes-container');
 const premioFinalTexto = document.getElementById('premio-final');
+const timerBar = document.getElementById('timer-bar');
 
 const spans = {
     nivel: document.getElementById('nivel-atual'),
@@ -51,38 +42,36 @@ const perguntasPadrao = [
   { pergunta: "Qual a montanha mais alta do mundo?", opcoes: ["K2", "Monte Everest", "Aconcágua", "Makalu"], resposta: "Monte Everest" }
 ];
 
-// --- CONFIGURAÇÃO DE SOM ---
-let sonsAcertoCarregados = [];
-let sonsErroCarregados = [];
-const sonsAcertoPadrao = [ { note: 'C5', duration: '8n' }, { note: 'E5', duration: '8n' }, { note: 'G5', duration: '8n' } ];
-const sonsErroPadrao = [ { note: 'C3', duration: '4n' }, { note: 'B2', duration: '4n' } ];
+// --- CONFIGURAÇÃO DE SOM AUTOMÁTICA ---
+const nomesSonsAcerto = ['A1.mp3', 'A2.mp3'];
+const nomesSonsErro = ['E1.mp3', 'E2.mp3'];
+const audioNovaPergunta = new Audio('audios/nova-pergunta.mp3');
+const audioTema = new Audio('audios/tema.mp3');
+audioTema.loop = true;
+const audioFinal = new Audio('audios/final.mp3');
 
 function tocarSom(tipo) {
-    const listaSons = tipo === 'acerto' ? sonsAcertoCarregados : sonsErroCarregados;
-    if (listaSons.length > 0) {
-        // Toca um som carregado pelo usuário
-        const somUrl = listaSons[Math.floor(Math.random() * listaSons.length)];
-        const audio = new Audio(somUrl);
-        audio.play();
-    } else {
-        // Toca o som padrão gerado pelo Tone.js
-        try {
-            if (typeof Tone === 'undefined' || Tone.context.state !== 'running') { return; }
-            const synth = new Tone.Synth().toDestination();
-            const somPadrao = tipo === 'acerto'
-                ? sonsAcertoPadrao[Math.floor(Math.random() * sonsAcertoPadrao.length)]
-                : sonsErroPadrao[Math.floor(Math.random() * sonsErroPadrao.length)];
-            synth.triggerAttackRelease(somPadrao.note, somPadrao.duration);
-        } catch (error) { console.error("Erro ao tocar som padrão:", error); }
+    if (tipo === 'nova-pergunta') {
+        audioNovaPergunta.play().catch(e => console.error("Erro ao tocar som de nova pergunta:", e));
+        return;
+    }
+    const listaNomes = tipo === 'acerto' ? nomesSonsAcerto : nomesSonsErro;
+    const pasta = tipo === 'acerto' ? 'acerto' : 'erro';
+    if (listaNomes.length > 0) {
+        const nomeArquivo = listaNomes[Math.floor(Math.random() * listaNomes.length)];
+        const audio = new Audio(`audios/${pasta}/${nomeArquivo}`);
+        audio.play().catch(e => console.error(`Erro ao tocar áudio: audios/${pasta}/${nomeArquivo}`, e));
     }
 }
 
-// --- ESTADO DO JOGO ---
+// --- ESTADO DO JOGO E CRONÔMETRO ---
 let perguntasOriginais = []; 
 let perguntas = [];
 let perguntaAtualIndex = 0;
 let pulosRestantes = 3;
 let jogoAtivo = false;
+let timerInterval = null;
+const TEMPO_LIMITE = 20; // 20 segundos
 
 const niveisPremio = {
     acertar: [1000, 2000, 3000, 5000, 10000, 20000, 30000, 50000, 100000, 500000, 1000000],
@@ -91,30 +80,88 @@ const niveisPremio = {
 };
 const totalPerguntasJogo = niveisPremio.acertar.length;
 
+// --- GERENCIAMENTO DE TELAS ---
+function mostrarTela(nomeTela) {
+    [telaInicial, telaJogo, telaFinal].forEach(tela => {
+        tela.id === nomeTela ? tela.classList.remove('escondido') : tela.classList.add('escondido');
+    });
+}
+
+// --- LÓGICA DO CRONÔMETRO ---
+function pararTimer() {
+    clearInterval(timerInterval);
+}
+
+function tempoEsgotado() {
+    if (!jogoAtivo) return;
+    jogoAtivo = false;
+    pararTimer();
+    tocarSom('erro');
+    alert("Tempo esgotado!");
+    fimDeJogo(false);
+}
+
+function iniciarTimer() {
+    pararTimer();
+    let tempoRestante = TEMPO_LIMITE;
+    timerBar.style.transition = 'none'; // Reseta transição para mudança de cor imediata
+    timerBar.style.height = '100%';
+    timerBar.style.backgroundColor = '#28a745'; // Verde
+    
+    // Força o navegador a aplicar o estilo antes de reativar a transição
+    void timerBar.offsetWidth; 
+    
+    timerBar.style.transition = `height 1s linear, background-color 0.5s`;
+
+    timerInterval = setInterval(() => {
+        tempoRestante--;
+        const alturaPercentual = (tempoRestante / TEMPO_LIMITE) * 100;
+        timerBar.style.height = `${alturaPercentual}%`;
+
+        if (tempoRestante <= TEMPO_LIMITE * 0.5) { // Metade do tempo
+            timerBar.style.backgroundColor = '#fca311'; // Amarelo
+        }
+        if (tempoRestante <= TEMPO_LIMITE * 0.25) { // 1/4 do tempo
+            timerBar.style.backgroundColor = '#dc3545'; // Vermelho
+        }
+        if (tempoRestante < 0) {
+            tempoEsgotado();
+        }
+    }, 1000);
+}
+
 // --- FUNÇÕES PRINCIPAIS DO JOGO ---
 function iniciarJogo() {
     if (perguntasOriginais.length < totalPerguntasJogo) {
-        alert(`Não há perguntas suficientes para iniciar!\n\nPerguntas necessárias: ${totalPerguntasJogo}\nPerguntas disponíveis: ${perguntasOriginais.length}`);
+        alert(`Não há perguntas suficientes!\nNecessárias: ${totalPerguntasJogo}\nDisponíveis: ${perguntasOriginais.length}`);
         voltarParaTelaInicial();
         return;
     }
-
+    audioTema.pause(); 
+    audioTema.currentTime = 0;
     perguntas = [...perguntasOriginais].sort(() => Math.random() - 0.5).slice(0, totalPerguntasJogo);
     perguntaAtualIndex = 0;
     pulosRestantes = 3;
     jogoAtivo = true;
-
     [btnPular, btnCartas, btnUniversitarios].forEach(btn => btn.disabled = false);
     btnPular.textContent = `Pular (${pulosRestantes})`;
+    mostrarTela('tela-jogo');
+    transicaoParaProximaPergunta(true);
+}
+
+function transicaoParaProximaPergunta(primeiraPergunta = false) {
+    pararTimer();
+    const containers = [perguntaContainer, opcoesContainer];
+    containers.forEach(c => c.classList.add('fade-out'));
     
-    // Esconde todas as telas de configuração
-    telaInicial.classList.add('escondido');
-    telaEditor.classList.add('escondido');
-    telaFinal.classList.add('escondido');
-    // Mostra a tela de jogo
-    telaJogo.classList.remove('escondido');
-    
-    mostrarProximaPergunta();
+    setTimeout(() => {
+        if (!primeiraPergunta) {
+            perguntaAtualIndex++;
+        }
+        mostrarProximaPergunta();
+        tocarSom('nova-pergunta');
+        containers.forEach(c => c.classList.remove('fade-out'));
+    }, 450);
 }
 
 function mostrarProximaPergunta() {
@@ -130,6 +177,8 @@ function mostrarProximaPergunta() {
         opcoesContainer.appendChild(divOpcao);
     });
     atualizarPlacar();
+    jogoAtivo = true;
+    iniciarTimer();
 }
 
 function atualizarPlacar() {
@@ -143,21 +192,16 @@ function atualizarPlacar() {
 function selecionarResposta(opcaoElemento, respostaCorreta) {
     if (!jogoAtivo) return;
     jogoAtivo = false; 
+    pararTimer();
     const todasAsOpcoes = opcoesContainer.querySelectorAll('.opcao');
     if (opcaoElemento.textContent === respostaCorreta) {
         tocarSom('acerto');
         opcaoElemento.classList.add('correta');
-        setTimeout(() => {
-            perguntaAtualIndex++;
-            jogoAtivo = true;
-            mostrarProximaPergunta();
-        }, 2500);
+        setTimeout(() => transicaoParaProximaPergunta(), 2500);
     } else {
         tocarSom('erro');
         opcaoElemento.classList.add('errada');
-        todasAsOpcoes.forEach(opt => {
-            if (opt.textContent === respostaCorreta) { opt.classList.add('revelada'); }
-        });
+        todasAsOpcoes.forEach(opt => { if (opt.textContent === respostaCorreta) { opt.classList.add('revelada'); } });
         setTimeout(() => fimDeJogo(false), 3000);
     }
 }
@@ -165,16 +209,18 @@ function selecionarResposta(opcaoElemento, respostaCorreta) {
 // --- FUNÇÕES DE AJUDA ---
 function pularPergunta() {
     if (pulosRestantes > 0 && jogoAtivo) {
+        pararTimer();
         pulosRestantes--;
-        perguntaAtualIndex++;
         btnPular.textContent = `Pular (${pulosRestantes})`;
         if (pulosRestantes === 0) { btnPular.disabled = true; }
-        mostrarProximaPergunta();
+        jogoAtivo = false; 
+        transicaoParaProximaPergunta();
     }
 }
 
 function usarCartas() {
     if (!jogoAtivo || btnCartas.disabled) return;
+    // O timer continua rodando enquanto o jogador pensa
     const pergunta = perguntas[perguntaAtualIndex];
     const opcoes = Array.from(opcoesContainer.children);
     const opcoesErradas = opcoes.filter(opt => opt.textContent !== pergunta.resposta);
@@ -190,6 +236,7 @@ function usarCartas() {
 
 function usarUniversitarios() {
     if (!jogoAtivo || btnUniversitarios.disabled) return;
+    // O timer continua rodando
     const pergunta = perguntas[perguntaAtualIndex];
     const chanceAcerto = Math.random() < 0.85; 
     let sugestao = chanceAcerto ? pergunta.resposta : pergunta.opcoes.filter(opt => opt !== pergunta.resposta)[0];
@@ -200,13 +247,16 @@ function usarUniversitarios() {
 // --- FINALIZAÇÃO DO JOGO E NAVEGAÇÃO ---
 function pararJogo() {
     if (!jogoAtivo) return;
+    pararTimer();
     const premio = niveisPremio.parar[perguntaAtualIndex] || 0;
     fimDeJogo(false, premio);
 }
 
 function fimDeJogo(ganhou, premioParada = -1) {
-    telaJogo.classList.add('escondido');
-    telaFinal.classList.remove('escondido');
+    pararTimer();
+    audioTema.pause();
+    audioFinal.play().catch(e => console.error("Erro ao tocar áudio final:", e));
+    mostrarTela('tela-final');
     jogoAtivo = false;
     let premioFinal = 0;
     if (premioParada > -1) { premioFinal = premioParada; }
@@ -216,16 +266,12 @@ function fimDeJogo(ganhou, premioParada = -1) {
 }
 
 function voltarParaTelaInicial() {
-    telaEditor.classList.add('escondido');
-    telaFinal.classList.add('escondido');
-    telaJogo.classList.add('escondido');
-    telaInicial.classList.remove('escondido');
-    // Reseta o status do editor
+    pararTimer();
+    audioFinal.pause();
+    audioFinal.currentTime = 0;
+    audioTema.play().catch(e => console.error("Erro ao tocar áudio de tema:", e));
+    mostrarTela('tela-inicial');
     perguntasOriginais = [];
-    sonsAcertoCarregados = [];
-    sonsErroCarregados = [];
-    statusPerguntas.textContent = "Nenhum arquivo de perguntas carregado.";
-    statusSons.textContent = "Usando sons padrão.";
 }
 
 // --- LÓGICA DO MODO EDITOR ---
@@ -240,7 +286,6 @@ function lerArquivoDePerguntas(evento) {
                  throw new Error("Estrutura do arquivo JSON inválida.");
             }
             perguntasOriginais = perguntasDoArquivo;
-            statusPerguntas.textContent = `Arquivo "${arquivo.name}" carregado.`;
             iniciarJogo();
         } catch (error) {
             alert(`Erro ao ler o arquivo de perguntas: ${error.message}`);
@@ -249,29 +294,11 @@ function lerArquivoDePerguntas(evento) {
     leitor.readAsText(arquivo);
 }
 
-function lerArquivosDeSom(evento, tipo) {
-    const arquivos = evento.target.files;
-    if (!arquivos.length) return;
-
-    const listaSons = tipo === 'acerto' ? sonsAcertoCarregados : sonsErroCarregados;
-    // Limpa a lista anterior antes de adicionar novos sons
-    listaSons.length = 0; 
-    
-    for (const arquivo of arquivos) {
-        const urlSom = URL.createObjectURL(arquivo);
-        listaSons.push(urlSom);
-    }
-    
-    statusSons.textContent = `Sons personalizados carregados! (${sonsAcertoCarregados.length} acerto, ${sonsErroCarregados.length} erro).`;
-    alert(`${arquivos.length} arquivo(s) de som de ${tipo} carregado(s) com sucesso!`);
-}
-
-
 // --- EVENT LISTENERS ---
 function iniciarContextoDeAudio() {
-    if (typeof Tone !== 'undefined' && Tone.context.state !== 'running') {
-        Tone.start();
-    }
+    audioTema.play().catch(e => {
+        // Silencia o erro de autoplay bloqueado
+    });
 }
 
 btnModoJogador.addEventListener('click', () => {
@@ -280,23 +307,16 @@ btnModoJogador.addEventListener('click', () => {
     iniciarJogo();
 });
 
-btnModoEditor.addEventListener('click', () => {
+btnCarregarPerguntas.addEventListener('click', () => {
     iniciarContextoDeAudio();
-    telaInicial.classList.add('escondido');
-    telaEditor.classList.remove('escondido');
+    inputPerguntas.click();
 });
 
-btnCarregarPerguntas.addEventListener('click', () => inputPerguntas.click());
-btnCarregarSomAcerto.addEventListener('click', () => inputSomAcerto.click());
-btnCarregarSomErro.addEventListener('click', () => inputSomErro.click());
-btnVoltarInicio.addEventListener('click', voltarParaTelaInicial);
-
 inputPerguntas.addEventListener('change', lerArquivoDePerguntas);
-inputSomAcerto.addEventListener('change', (e) => lerArquivosDeSom(e, 'acerto'));
-inputSomErro.addEventListener('change', (e) => lerArquivosDeSom(e, 'erro'));
-
 btnReiniciar.addEventListener('click', voltarParaTelaInicial);
 btnParar.addEventListener('click', pararJogo);
 btnPular.addEventListener('click', pularPergunta);
 btnCartas.addEventListener('click', usarCartas);
 btnUniversitarios.addEventListener('click', usarUniversitarios);
+
+window.addEventListener('load', iniciarContextoDeAudio);
