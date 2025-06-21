@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Show do Milhão</title>
+    <title>Quiz do Milho</title>
     <link rel="stylesheet" href="style.css">
     <!-- Biblioteca de som adicionada -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
@@ -11,35 +11,24 @@
 <body>
 
     <div id="jogo-container">
-        <!-- TELA INICIAL COM ESCOLHA DE MODO -->
+        <!-- TELA INICIAL SIMPLIFICADA -->
         <div id="tela-inicial">
-            <h1>Show do Milhão</h1>
+            <h1>Quiz do Milho</h1>
             <div id="modo-selecao">
-                <button id="btn-modo-jogador">Modo Jogador</button>
-                <button id="btn-modo-editor">Modo Editor</button>
-            </div>
-        </div>
-
-        <!-- TELA DO MODO EDITOR ATUALIZADA -->
-        <div id="tela-editor" class="escondido">
-            <h2>Modo Editor</h2>
-            <p>Personalize seu jogo. Carregue um arquivo de perguntas e seus próprios sons.</p>
-            <div class="editor-botoes">
+                <button id="btn-modo-jogador">Jogar com Perguntas Padrão</button>
                 <button id="btn-carregar-perguntas">Carregar Perguntas (.json)</button>
-                <button id="btn-carregar-som-acerto">Carregar Sons de Acerto</button>
-                <button id="btn-carregar-som-erro">Carregar Sons de Erro</button>
-                <button id="btn-voltar-inicio">Voltar</button>
             </div>
-            <p class="editor-status" id="status-perguntas">Nenhum arquivo de perguntas carregado.</p>
-            <p class="editor-status" id="status-sons">Usando sons padrão.</p>
-             <!-- Inputs para carregar arquivos, sempre escondidos -->
+            <!-- Input para carregar perguntas, sempre escondido -->
             <input type="file" id="input-perguntas" accept=".json" class="escondido">
-            <input type="file" id="input-som-acerto" accept="audio/*" class="escondido" multiple>
-            <input type="file" id="input-som-erro" accept="audio/*" class="escondido" multiple>
         </div>
 
-        <!-- TELA DE JOGO -->
+        <!-- TELA DE JOGO ATUALIZADA -->
         <div id="tela-jogo" class="escondido">
+            <!-- NOVO: Indicador de tempo -->
+            <div id="timer-container">
+                <div id="timer-bar"></div>
+            </div>
+
             <div id="placar">
                 <span>Nível: <span id="nivel-atual">1</span></span>
                 <span>Errar: R$ <span id="valor-errar">0</span></span>
