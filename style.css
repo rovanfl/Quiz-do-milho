@@ -20,7 +20,7 @@ body {
     border-radius: 15px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     text-align: center;
-    position: relative; /* Necessário para posicionar o timer dentro */
+    position: relative; /* Necessário para posicionar elementos internos */
 }
 
 .escondido {
@@ -37,7 +37,7 @@ button {
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s, opacity 0.3s;
-    margin: 5px; /* Adicionado para espaçamento */
+    margin: 5px; 
 }
 
 button:hover:not(:disabled) {
@@ -51,7 +51,19 @@ button:disabled {
     opacity: 0.7;
 }
 
-/* Estilos para tela inicial */
+#btn-toggle-som {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    padding: 5px;
+    color: white;
+    opacity: 0.7;
+}
+#btn-toggle-som:hover { opacity: 1; }
+#btn-toggle-som svg { stroke: white; }
+
 #modo-selecao {
     margin-top: 20px;
     display: flex;
@@ -60,11 +72,10 @@ button:disabled {
     gap: 10px;
 }
 
-/* NOVO: Estilos do cronômetro */
 #timer-container {
     position: absolute;
     top: 20px;
-    left: -30px; /* Posiciona fora do container principal */
+    left: -30px; 
     width: 20px;
     height: calc(100% - 40px);
     background-color: rgba(0, 0, 0, 0.5);
@@ -76,7 +87,7 @@ button:disabled {
 #timer-bar {
     width: 100%;
     height: 100%;
-    background-color: #28a745; /* Verde */
+    background-color: #28a745;
     transition: height 1s linear, background-color 0.5s;
     position: absolute;
     bottom: 0;
@@ -89,43 +100,44 @@ button:disabled {
     background-color: rgba(0, 0, 0, 0.2);
     padding: 10px;
     border-radius: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
-#placar span {
+#placar span { 
     margin: 5px 10px;
+    font-weight: bold;
 }
+/* Cores de destaque para os prêmios */
+.premio-errar { color: #ff6b6b; }
+.premio-parar { color: #fca311; }
+.premio-acertar { color: #51cf66; }
 
-#ajudas-container {
-    margin-bottom: 20px;
-}
 
-.ajuda {
-    background-color: #4a5a88;
-    color: white;
-}
-
-#pergunta-container, #opcoes-container {
+#pergunta-container {
     background-color: rgba(0, 0, 0, 0.3);
-    padding: 20px;
+    padding: 25px;
     border-radius: 8px;
-    margin-bottom: 20px;
-    font-size: 1.2em;
-    min-height: 50px;
+    margin-bottom: 15px;
+    min-height: 80px; /* Altura aumentada */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: opacity 0.4s ease-in-out;
+}
+#pergunta-texto {
+    font-size: 1.4em; /* Fonte aumentada */
+    margin: 0;
 }
 
 #opcoes-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
-    padding: 15px; 
-    background-color: transparent; 
+    margin-bottom: 20px;
+    transition: opacity 0.4s ease-in-out;
 }
 
-.fade-out {
-    opacity: 0;
-}
+.fade-out { opacity: 0; }
 
 .opcao {
     background-color: #1e3a8a;
@@ -134,32 +146,41 @@ button:disabled {
     cursor: pointer;
     transition: background-color 0.3s, visibility 0.3s;
 }
+.opcao:hover { background-color: #3b5998; }
 
-.opcao:hover {
-    background-color: #3b5998;
+#botoes-acao-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+/* Botões de ajuda agora usam a cor principal */
+.ajuda {
+    background-color: #fca311;
 }
 
 @keyframes pisca-verde {
     0%, 100% { background-color: #28a745; transform: scale(1.02); }
     50% { background-color: #1e3a8a; transform: scale(1); }
 }
-
 @keyframes pisca-vermelho {
     0%, 100% { background-color: #dc3545; transform: scale(1.02); }
     50% { background-color: #1e3a8a; transform: scale(1); }
 }
 
-.opcao.correta {
-    animation: pisca-verde 0.8s 3; 
-    color: white;
-}
+.opcao.correta { animation: pisca-verde 0.8s 3; color: white; }
+.opcao.errada { animation: pisca-vermelho 0.8s 3; color: white; }
+.opcao.revelada { background-color: #28a745; color: white; }
 
-.opcao.errada {
-    animation: pisca-vermelho 0.8s 3; 
-    color: white;
+ Estilos para a tela de créditos 
+#tela-creditos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
 }
-
-.opcao.revelada {
-    background-color: #28a745;
-    color: white;
+.creditos-texto {
+    font-size: 1.2em;
+    line-height: 1.6;
 }
