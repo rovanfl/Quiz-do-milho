@@ -5,46 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz do Milho</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Biblioteca de som adicionada -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
 </head>
 <body>
 
     <div id="jogo-container">
-        <!-- TELA INICIAL SIMPLIFICADA -->
+        <button id="btn-toggle-som">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-volume-2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+        </button>
+
+        <!-- TELA INICIAL ATUALIZADA -->
         <div id="tela-inicial">
             <h1>Quiz do Milho</h1>
             <div id="modo-selecao">
                 <button id="btn-modo-jogador">Jogar com Perguntas Padrão</button>
                 <button id="btn-carregar-perguntas">Carregar Perguntas (.json)</button>
+                <button id="btn-creditos">Créditos</button>
             </div>
-            <!-- Input para carregar perguntas, sempre escondido -->
             <input type="file" id="input-perguntas" accept=".json" class="escondido">
         </div>
 
-        <!-- TELA DE JOGO ATUALIZADA -->
+        <!-- TELA DE JOGO COM LAYOUT ATUALIZADO -->
         <div id="tela-jogo" class="escondido">
-            <!-- NOVO: Indicador de tempo -->
-            <div id="timer-container">
-                <div id="timer-bar"></div>
-            </div>
-
+            <div id="timer-container"><div id="timer-bar"></div></div>
             <div id="placar">
                 <span>Nível: <span id="nivel-atual">1</span></span>
-                <span>Errar: R$ <span id="valor-errar">0</span></span>
-                <span>Parar: R$ <span id="valor-parar">0</span></span>
-                <span>Acertar: R$ <span id="valor-acertar">1.000</span></span>
+                <span class="premio-errar">Errar: R$ <span id="valor-errar">0</span></span>
+                <span class="premio-parar">Parar: R$ <span id="valor-parar">0</span></span>
+                <span class="premio-acertar">Acertar: R$ <span id="valor-acertar">1.000</span></span>
             </div>
-            <div id="ajudas-container">
+            <div id="pergunta-container"><p id="pergunta-texto"></p></div>
+            <div id="opcoes-container"></div>
+            <!-- Container de botões de ação reorganizado -->
+            <div id="botoes-acao-container">
                 <button id="btn-pular" class="ajuda">Pular (3)</button>
                 <button id="btn-cartas" class="ajuda">Cartas</button>
                 <button id="btn-universitarios" class="ajuda">Universitários</button>
+                <button id="btn-parar">Parar</button>
             </div>
-            <div id="pergunta-container">
-                <p id="pergunta-texto"></p>
-            </div>
-            <div id="opcoes-container"></div>
-            <button id="btn-parar">Parar</button>
         </div>
 
         <!-- TELA FINAL -->
@@ -52,6 +49,14 @@
             <h2>Fim de Jogo!</h2>
             <p>Você ganhou: <strong id="premio-final">R$ 0</strong></p>
             <button id="btn-reiniciar">Jogar Novamente</button>
+        </div>
+
+        <!-- NOVA TELA DE CRÉDITOS -->
+        <div id="tela-creditos" class="escondido">
+            <h2>Créditos</h2>
+            <p class="creditos-texto">Jogo produzido para fins pedagógicos (sem fins lucrativos).</p>
+            <p class="creditos-texto">Produzido por <strong>Prof. Rovan F. Lopes</strong> com o <strong>Gemini 2.5 Pro</strong>.</p>
+            <button id="btn-voltar-creditos">Voltar</button>
         </div>
     </div>
 
